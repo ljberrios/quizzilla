@@ -1,32 +1,54 @@
 package edu.uprb.quizzilla;
 
-import edu.uprb.quizzilla.client.ClientSession;
+import edu.uprb.quizzilla.client.KBInputListener;
+import edu.uprb.quizzilla.command.ExitCommand;
+import edu.uprb.quizzilla.game.GameConfig;
 import edu.uprb.quizzilla.network.PacketDispatcher;
-import edu.uprb.quizzilla.network.handlers.PlayerJoinHandler;
-import edu.uprb.quizzilla.network.handlers.PlayerLoginHandler;
-import edu.uprb.quizzilla.network.packets.PacketPlayerJoin;
-import edu.uprb.quizzilla.network.packets.PacketPlayerLogin;
+import edu.uprb.quizzilla.network.handlers.ChatMessageHandler;
+import edu.uprb.quizzilla.network.handlers.SessionStartHandler;
+import edu.uprb.quizzilla.network.packets.PacketChatMessage;
+import edu.uprb.quizzilla.network.packets.PacketSessionStart;
 import edu.uprb.quizzilla.server.SessionManager;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
+import edu.uprb.quizzilla.command.CommandManager;
+import edu.uprb.quizzilla.command.CreateCommand;
 
 public class Quizzilla {
-    public static void main(String[] args) throws IOException, InterruptedException {
-        PacketDispatcher dispatcher = new PacketDispatcher();
+
+    private volatile boolean running = true;
+
+    public static void main(String[] args) throws Exception {
+        // start client
+        Quizzilla main = new Quizzilla();
+
         // register packet handlers
-        dispatcher.registerHandler(PacketPlayerLogin.class, new PlayerLoginHandler());
-        dispatcher.registerHandler(PacketPlayerJoin.class, new PlayerJoinHandler());
+        var dispatcher = new PacketDispatcher();
+        dispatcher.registerHandler(PacketSessionStart.class, new SessionStartHandler());
+        dispatcher.registerHandler(PacketChatMessage.class, new ChatMessageHandler());
 
-        SessionManager sessions = new SessionManager(dispatcher);
-        sessions.listen(8080);
+        // load game settings and questions
+        var config = new GameConfig();
+        config.init();
 
-        InetAddress serverAddress = InetAddress.getLocalHost();
-        ClientSession session = new ClientSession(new Socket(serverAddress, 8080), dispatcher);
-        Thread clientThread = Thread.startVirtualThread(session);
-        clientThread.join();
+        // create server without starting it
+        var sessions = new SessionManager(config.getMaxSessions(), dispatcher);
 
+        // register commands
+        var commands = new CommandManager();
+        commands.registerCommand(new CreateCommand(sessions, dispatcher));
+        commands.registerCommand(new ExitCommand(main));
+
+        var inputListener = new KBInputListener(main, commands);
+        var inputThread = inputListener.init();
+
+        inputThread.join();
         sessions.shutdown();
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void stop() {
+        this.running = false;
     }
 }

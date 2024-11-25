@@ -6,6 +6,7 @@ import edu.uprb.quizzilla.network.Session;
 
 import java.net.Socket;
 import java.util.Queue;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Logger;
 
@@ -21,6 +22,7 @@ public class ServerSession implements Session {
 
     private final Socket clientSocket;
     private final PacketDispatcher dispatcher;
+    private final UUID id = UUID.randomUUID();
     private volatile boolean alive = true;
 
     public ServerSession(Socket clientSocket, PacketDispatcher dispatcher) {
@@ -39,6 +41,11 @@ public class ServerSession implements Session {
     }
 
     @Override
+    public UUID getID() {
+        return id;
+    }
+
+    @Override
     public PacketDispatcher getDispatcher() {
         return dispatcher;
     }
@@ -53,7 +60,8 @@ public class ServerSession implements Session {
         return alive;
     }
 
-    void stop() {
+    @Override
+    public void stop() {
         logger.info("Session ended: " + clientSocket.getInetAddress());
         alive = false;
     }

@@ -1,0 +1,22 @@
+# max amount of sessions in server
+max-sessions: 10
+
+# game time limit (in seconds)
+time-limit: 300
+
+# trivia questions
+# questions with many choices are multiple choice questions
+categories:
+  us-states:
+    1:
+      question: "What state has the highest population?"
+      answer: "New York"
+      choices:
+        a: "New York"
+        b: "California"
+        c: "Florida"
+        d: "Texas"
+    2:
+      question: "What is the state capital of the US?"
+      answer: "Washington, D.C."
+      choices:
