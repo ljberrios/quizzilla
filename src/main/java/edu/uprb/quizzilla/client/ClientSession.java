@@ -7,7 +7,9 @@ import edu.uprb.quizzilla.network.Session;
 import java.net.Socket;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
 /**
@@ -18,11 +20,10 @@ public class ClientSession implements Session {
 
     private static final Logger logger = Logger.getLogger(ClientSession.class.getName());
 
-    private final Queue<Packet> outboundPackets = new ConcurrentLinkedQueue<>();
+    private final BlockingQueue<Packet> outboundPackets = new LinkedBlockingQueue<>();
 
     private final Socket serverSocket;
     private final PacketDispatcher dispatcher;
-    private UUID id;
     private volatile boolean alive = true;
 
     public ClientSession(Socket serverSocket, PacketDispatcher dispatcher) {
@@ -41,21 +42,12 @@ public class ClientSession implements Session {
     }
 
     @Override
-    public UUID getID() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    @Override
     public PacketDispatcher getDispatcher() {
         return dispatcher;
     }
 
     @Override
-    public Queue<Packet> getOutboundPackets() {
+    public BlockingQueue<Packet> getOutboundPackets() {
         return outboundPackets;
     }
 
@@ -66,7 +58,9 @@ public class ClientSession implements Session {
 
     @Override
     public void stop() {
-        logger.info("Session ended: " + serverSocket.getInetAddress());
-        alive = false;
+        if (alive) {
+            logger.info("Session ended: " + serverSocket.getInetAddress());
+            alive = false;
+        }
     }
 }

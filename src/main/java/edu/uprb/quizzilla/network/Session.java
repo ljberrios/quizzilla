@@ -9,6 +9,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,11 +34,6 @@ public interface Session extends Runnable {
     Logger getLogger();
 
     /**
-     * The session's unique ID.
-     */
-    UUID getID();
-
-    /**
      * See {@link PacketDispatcher}.
      */
     PacketDispatcher getDispatcher();
@@ -45,7 +41,7 @@ public interface Session extends Runnable {
     /**
      * Contains the packets that will get sent to the server/client.
      */
-    Queue<Packet> getOutboundPackets();
+    BlockingQueue<Packet> getOutboundPackets();
 
     /**
      * True if the session hasn't ended yet.
@@ -79,24 +75,23 @@ public interface Session extends Runnable {
         try (var out = new ObjectOutputStream(socket.getOutputStream());
              var in = new ObjectInputStream(socket.getInputStream()))
         {
-            // wait this amount (in ms) for a response
-            socket.setSoTimeout(100);
+            Thread.startVirtualThread(() -> {
+                while (isAlive()) {
+                    // send pending outbound packets
+                    try {
+                        out.writeObject(getOutboundPackets().take());
+                    } catch (Exception e) {
+                        logger.log(Level.WARNING, "Error sending packet", e);
+                    }
+                }
+            });
 
             while (isAlive()) {
-                // send pending outbound packets
-                var outbound = getOutboundPackets();
-                while (!outbound.isEmpty())
-                    out.writeObject(outbound.poll());
-
-                try {
-                    // wait a bit for incoming packets
-                    Object obj = in.readObject();
-                    // verify that it's a packet and process it
-                    if (obj instanceof Packet received)
-                        getDispatcher().dispatch(received, this);
-                } catch (SocketTimeoutException ignored) {
-                    // no response received, continue
-                }
+                // wait for incoming packets
+                Object obj = in.readObject();
+                // verify that it's a packet and process it
+                if (obj instanceof Packet received)
+                    getDispatcher().dispatch(received, this);
             }
         } catch (SocketException | EOFException ignored) {
             // connection lost
@@ -107,10 +102,10 @@ public interface Session extends Runnable {
         } finally {
             try {
                 socket.close();
+                stop(); // just in case
             } catch (IOException e) {
                 logger.log(Level.WARNING, "Error closing session socket", e);
             }
         }
     }
-
 }

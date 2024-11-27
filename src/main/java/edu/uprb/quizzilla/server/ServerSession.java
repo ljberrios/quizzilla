@@ -5,9 +5,12 @@ import edu.uprb.quizzilla.network.PacketDispatcher;
 import edu.uprb.quizzilla.network.Session;
 
 import java.net.Socket;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 /**
@@ -18,16 +21,21 @@ public class ServerSession implements Session {
 
     private static final Logger logger = Logger.getLogger(ServerSession.class.getName());
 
-    private final Queue<Packet> outboundPackets = new ConcurrentLinkedQueue<>();
+    private final BlockingQueue<Packet> outboundPackets = new LinkedBlockingQueue<>();
 
     private final Socket clientSocket;
     private final PacketDispatcher dispatcher;
     private final UUID id = UUID.randomUUID();
+    private final List<Consumer<ServerSession>> onStopCallbacks = new ArrayList<>();
     private volatile boolean alive = true;
 
     public ServerSession(Socket clientSocket, PacketDispatcher dispatcher) {
         this.clientSocket = clientSocket;
         this.dispatcher = dispatcher;
+    }
+
+    public UUID getID() {
+        return id;
     }
 
     @Override
@@ -41,17 +49,12 @@ public class ServerSession implements Session {
     }
 
     @Override
-    public UUID getID() {
-        return id;
-    }
-
-    @Override
     public PacketDispatcher getDispatcher() {
         return dispatcher;
     }
 
     @Override
-    public Queue<Packet> getOutboundPackets() {
+    public BlockingQueue<Packet> getOutboundPackets() {
         return outboundPackets;
     }
 
@@ -62,8 +65,18 @@ public class ServerSession implements Session {
 
     @Override
     public void stop() {
-        logger.info("Session ended: " + clientSocket.getInetAddress());
-        alive = false;
+        if (alive) {
+            alive = false;
+            notifyOnStop();
+        }
+    }
+
+    public void onStop(Consumer<ServerSession> consumer) {
+        onStopCallbacks.add(consumer);
+    }
+
+    private void notifyOnStop() {
+        onStopCallbacks.forEach(consumer -> consumer.accept(this));
     }
 
 }

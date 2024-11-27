@@ -11,7 +11,6 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.vertx:vertx-core:4.5.11'
     implementation 'com.esotericsoftware:kryo:5.6.2'
     implementation 'com.github.Carleslc.Simple-YAML:Simple-Yaml:1.8.4'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

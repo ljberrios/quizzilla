@@ -4,9 +4,10 @@ import edu.uprb.quizzilla.network.PacketDispatcher;
 import edu.uprb.quizzilla.network.packets.PacketSessionStart;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -16,7 +17,7 @@ import java.util.logging.Logger;
 
 /**
  * Contains all {@link ServerSession}s and their respective virtual threads.
- * To start the server, {@link #init(int)} must be called.
+ * To start the server, {@link #listenForConnections(int)} must be called.
  */
 public class SessionManager {
 
@@ -24,6 +25,7 @@ public class SessionManager {
 
     private final ExecutorService sessionThreadPool = Executors.newVirtualThreadPerTaskExecutor();
     private final Map<UUID, ServerSession> sessions = new ConcurrentHashMap<>();
+    private final Set<String> addresses = new HashSet<>();
     private final int maxSessions;
     private final PacketDispatcher dispatcher;
 
@@ -34,13 +36,7 @@ public class SessionManager {
         this.dispatcher = dispatcher;
     }
 
-    public void init(int port) {
-        listenForConnections(port);
-        startCleanupThread();
-    }
-
-    private void listenForConnections(int port) {
-        // listen for incoming connections
+    public void listenForConnections(int port) {
         Thread.startVirtualThread(() -> {
             try (ServerSocket serverSocket = new ServerSocket(port)) {
                 logger.info("Server is listening on port " + port);
@@ -52,23 +48,13 @@ public class SessionManager {
         });
     }
 
-    private void startCleanupThread() {
-        // constantly clean up sessions with closed sockets
-        Thread.startVirtualThread(() -> {
-            while (!sessionThreadPool.isShutdown()) {
-                try {
-                    sessions.entrySet().removeIf(entry -> !entry.getValue().isAlive());
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    logger.log(Level.WARNING, "Socket cleanup thread interrupted", e);
-                }
-            }
-        });
-    }
-
     private void startSession(ServerSocket serverSocket) throws IOException {
         Socket socket = serverSocket.accept();
+        if (addresses.contains(socket.getInetAddress().getHostAddress())) {
+            socket.close();
+            return;
+        }
+
         ServerSession session = new ServerSession(socket, dispatcher);
         // Assign server leader if first player
         if (this.leader == null) {
@@ -78,10 +64,15 @@ public class SessionManager {
 
         // Start the session
         sessions.put(session.getID(), session);
+        addresses.add(socket.getInetAddress().getHostAddress());
+
+        // Add session close callback
+        session.onStop(this::stopSession);
+
         // Handle the session in a new thread
         sessionThreadPool.submit(session);
 
-        // send session start packet to client
+        // Send session start packet to client
         session.sendPacket(new PacketSessionStart(
                 socket.getLocalAddress(), session.getID()));
 
@@ -93,17 +84,26 @@ public class SessionManager {
 
     public void stopSession(UUID uuid) {
         ServerSession session = sessions.get(uuid);
-        if (session != null) {
+        if (session != null)
+            stopSession(session);
+    }
+
+    public void stopSession(ServerSession session) {
+        if (session.isAlive())
             session.stop();
-            sessions.remove(uuid);
-        }
+
+        var socket = session.getSocket();
+        addresses.remove(socket.getInetAddress().getHostAddress());
+        sessions.remove(session.getID());
+        logger.info(String.format(
+                "Session ended: %s | Sessions: %d/%d\n",
+                socket.getInetAddress(), sessions.size(), maxSessions));
     }
 
     public void shutdown() {
         if (!sessionThreadPool.isShutdown()) {
             logger.info("Shutting down. Ending all sessions...");
-            sessions.values().forEach(ServerSession::stop);
-            sessions.clear();
+            sessions.keySet().forEach(this::stopSession);
             sessionThreadPool.shutdown();
         }
     }

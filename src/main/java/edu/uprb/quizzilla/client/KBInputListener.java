@@ -16,7 +16,6 @@ public class KBInputListener {
 
     private final Quizzilla main;
     private final CommandManager commands;
-    private Session session = null;
 
     public KBInputListener(Quizzilla main, CommandManager commands) {
         this.main = main;
@@ -38,19 +37,11 @@ public class KBInputListener {
             String label = matcher.group(1);
             String args = matcher.group(2);
             try {
-                commands.processCommand(session, label,
+                commands.processCommand(main.getClientSession(), label,
                         args != null ? args.split(" ") : new String[]{});
             } catch (UnknownCommandException e) {
                 print(RED + e.getMessage());
             }
         }
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
     }
 }

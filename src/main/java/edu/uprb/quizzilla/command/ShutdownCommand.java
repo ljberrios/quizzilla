@@ -5,17 +5,17 @@ import edu.uprb.quizzilla.network.Session;
 
 import static edu.uprb.quizzilla.util.Colors.*;
 
-public class ExitCommand implements Command {
+public class ShutdownCommand implements Command {
 
     private final Quizzilla main;
 
-    public ExitCommand(Quizzilla main) {
+    public ShutdownCommand(Quizzilla main) {
         this.main = main;
     }
 
     @Override
     public String getLabel() {
-        return "exit";
+        return "shutdown";
     }
 
     @Override
