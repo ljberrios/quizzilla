@@ -7,8 +7,6 @@ import edu.uprb.quizzilla.network.PacketDispatcher;
 import edu.uprb.quizzilla.network.handlers.*;
 import edu.uprb.quizzilla.network.packets.*;
 
-import java.util.UUID;
-
 public class Client {
 
     private ClientSession clientSession;
@@ -27,7 +25,7 @@ public class Client {
         dispatcher.registerHandler(PacketPing.class, new PingHandler());
         dispatcher.registerHandler(PacketPlayerReady.class, new PlayerReadyHandler(client));
         dispatcher.registerHandler(PacketPlayerAnswer.class, new PlayerAnswerHandler(client));
-        dispatcher.registerHandler(PacketPlayerJoin.class, new PlayerLoginHandler(client));
+        dispatcher.registerHandler(PacketPlayerJoin.class, new PlayerJoinHandler(client));
         dispatcher.registerHandler(PacketPlaySound.class, new PlaySoundHandler());
         dispatcher.registerHandler(PacketGameChat.class, new GameChatHandler(client));
 

@@ -6,11 +6,11 @@ import edu.uprb.quizzilla.network.PacketHandler;
 import edu.uprb.quizzilla.network.Session;
 import edu.uprb.quizzilla.network.packets.PacketPlayerJoin;
 
-public class PlayerLoginHandler implements PacketHandler<PacketPlayerJoin> {
+public class PlayerJoinHandler implements PacketHandler<PacketPlayerJoin> {
 
     private final Client client;
 
-    public PlayerLoginHandler(Client client) {
+    public PlayerJoinHandler(Client client) {
         this.client = client;
     }
 
