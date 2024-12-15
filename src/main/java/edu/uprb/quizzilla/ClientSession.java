@@ -1,15 +1,14 @@
-package edu.uprb.quizzilla.client;
+package edu.uprb.quizzilla;
 
 import edu.uprb.quizzilla.network.Packet;
 import edu.uprb.quizzilla.network.PacketDispatcher;
 import edu.uprb.quizzilla.network.Session;
 
 import java.net.Socket;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 /**
@@ -24,7 +23,8 @@ public class ClientSession implements Session {
 
     private final Socket serverSocket;
     private final PacketDispatcher dispatcher;
-    private volatile boolean alive = true;
+    private final AtomicBoolean alive = new AtomicBoolean(true);
+    private UUID serverID;
 
     public ClientSession(Socket serverSocket, PacketDispatcher dispatcher) {
         this.serverSocket = serverSocket;
@@ -42,6 +42,15 @@ public class ClientSession implements Session {
     }
 
     @Override
+    public UUID getID() {
+        return serverID;
+    }
+
+    public void setID(UUID uuid) {
+        this.serverID = uuid;
+    }
+
+    @Override
     public PacketDispatcher getDispatcher() {
         return dispatcher;
     }
@@ -53,14 +62,12 @@ public class ClientSession implements Session {
 
     @Override
     public boolean isAlive() {
-        return alive;
+        return alive.get();
     }
 
     @Override
     public void stop() {
-        if (alive) {
+        if (alive.compareAndSet(true, false))
             logger.info("Session ended: " + serverSocket.getInetAddress());
-            alive = false;
-        }
     }
 }

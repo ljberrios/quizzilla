@@ -1,16 +1,19 @@
-package edu.uprb.quizzilla.server;
+package edu.uprb.quizzilla;
 
 import edu.uprb.quizzilla.network.Packet;
 import edu.uprb.quizzilla.network.PacketDispatcher;
 import edu.uprb.quizzilla.network.Session;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -27,13 +30,14 @@ public class ServerSession implements Session {
     private final PacketDispatcher dispatcher;
     private final UUID id = UUID.randomUUID();
     private final List<Consumer<ServerSession>> onStopCallbacks = new ArrayList<>();
-    private volatile boolean alive = true;
+    private final AtomicBoolean alive = new AtomicBoolean(true);
 
     public ServerSession(Socket clientSocket, PacketDispatcher dispatcher) {
         this.clientSocket = clientSocket;
         this.dispatcher = dispatcher;
     }
 
+    @Override
     public UUID getID() {
         return id;
     }
@@ -60,15 +64,13 @@ public class ServerSession implements Session {
 
     @Override
     public boolean isAlive() {
-        return alive;
+        return alive.get();
     }
 
     @Override
     public void stop() {
-        if (alive) {
-            alive = false;
+        if (alive.compareAndSet(true, false))
             notifyOnStop();
-        }
     }
 
     public void onStop(Consumer<ServerSession> consumer) {

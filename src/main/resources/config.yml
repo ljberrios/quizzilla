@@ -1,8 +1,8 @@
 # max amount of sessions in server
 max-sessions: 10
 
-# game time limit (in seconds)
-time-limit: 300
+# round time limit (in seconds)
+time-limit: 30
 
 # trivia questions
 # questions with many choices are multiple choice questions
@@ -10,13 +10,225 @@ categories:
   us-states:
     1:
       question: "What state has the highest population?"
-      answer: "New York"
+      answer: "b"
       choices:
         a: "New York"
         b: "California"
         c: "Florida"
         d: "Texas"
     2:
-      question: "What is the state capital of the US?"
-      answer: "Washington, D.C."
+      question: "What state is the largest by area?"
+      answer: "b"
       choices:
+        a: "California"
+        b: "Alaska"
+        c: "Texas"
+        d: "Montana"
+    3:
+      question: "Which state is known as the 'Sunshine State'?"
+      answer: "b"
+      choices:
+        a: "Hawaii"
+        b: "Florida"
+        c: "Arizona"
+        d: "California"
+    4:
+      question: "Which state was the first to join the Union?"
+      answer: "a"
+      choices:
+        a: "Delaware"
+        b: "Virginia"
+        c: "Massachusetts"
+        d: "Pennsylvania"
+    5:
+      question: "Which state is nicknamed the 'Lone Star State'?"
+      answer: "a"
+      choices:
+        a: "Texas"
+        b: "New Mexico"
+        c: "Oklahoma"
+        d: "Arizona"
+    6:
+      question: "Which state's capital city is Sacramento?"
+      answer: "b"
+      choices:
+        a: "Washington"
+        b: "California"
+        c: "Oregon"
+        d: "Nevada"
+    7:
+      question: "Which state is home to Mount Rushmore?"
+      answer: "c"
+      choices:
+        a: "North Dakota"
+        b: "Wyoming"
+        c: "South Dakota"
+        d: "Montana"
+
+  us-presidents:
+    1:
+      question: "Who was the first President of the United States?"
+      answer: "c"
+      choices:
+        a: "Thomas Jefferson"
+        b: "John Adams"
+        c: "George Washington"
+        d: "James Madison"
+    2:
+      question: "Which President issued the Emancipation Proclamation?"
+      answer: "a"
+      choices:
+        a: "Abraham Lincoln"
+        b: "Ulysses S. Grant"
+        c: "Andrew Johnson"
+        d: "James Buchanan"
+    3:
+      question: "Which President served the shortest term, dying just 32 days after taking office?"
+      answer: "a"
+      choices:
+        a: "William Henry Harrison"
+        b: "Zachary Taylor"
+        c: "Warren G. Harding"
+        d: "James A. Garfield"
+    4:
+      question: "Who was President during the majority of World War II?"
+      answer: "b"
+      choices:
+        a: "Harry S. Truman"
+        b: "Franklin D. Roosevelt"
+        c: "Dwight D. Eisenhower"
+        d: "Woodrow Wilson"
+    5:
+      question: "Who resigned from the presidency in 1974?"
+      answer: "c"
+      choices:
+        a: "Gerald Ford"
+        b: "Jimmy Carter"
+        c: "Richard Nixon"
+        d: "Lyndon B. Johnson"
+
+  world-countries:
+    1:
+      question: "Which country has the largest population?"
+      answer: "a"
+      choices:
+        a: "China"
+        b: "India"
+        c: "United States"
+        d: "Indonesia"
+    2:
+      question: "What is the largest country by area?"
+      answer: "d"
+      choices:
+        a: "Canada"
+        b: "China"
+        c: "United States"
+        d: "Russia"
+    3:
+      question: "Which country is known as the 'Land of the Rising Sun'?"
+      answer: "a"
+      choices:
+        a: "Japan"
+        b: "Thailand"
+        c: "Philippines"
+        d: "South Korea"
+    4:
+      question: "Which country is home to the Great Barrier Reef?"
+      answer: "b"
+      choices:
+        a: "New Zealand"
+        b: "Australia"
+        c: "Fiji"
+        d: "Indonesia"
+    5:
+      question: "Which country has the longest coastline in the world?"
+      answer: "c"
+      choices:
+        a: "Russia"
+        b: "Australia"
+        c: "Canada"
+        d: "United States"
+
+  science:
+    1:
+      question: "What is the chemical symbol for gold?"
+      answer: "b"
+      choices:
+        a: "Ag"
+        b: "Au"
+        c: "Pt"
+        d: "Pb"
+    2:
+      question: "What gas do plants primarily absorb for photosynthesis?"
+      answer: "c"
+      choices:
+        a: "Oxygen"
+        b: "Nitrogen"
+        c: "Carbon dioxide"
+        d: "Argon"
+    3:
+      question: "What is the speed of light in a vacuum?"
+      answer: "d"
+      choices:
+        a: "3.0 x 10^5 m/s"
+        b: "3.0 x 10^6 m/s"
+        c: "3.0 x 10^7 m/s"
+        d: "3.0 x 10^8 m/s"
+    4:
+      question: "Who proposed the theory of general relativity?"
+      answer: "b"
+      choices:
+        a: "Isaac Newton"
+        b: "Albert Einstein"
+        c: "Niels Bohr"
+        d: "Galileo Galilei"
+    5:
+      question: "What is the smallest unit of life?"
+      answer: "d"
+      choices:
+        a: "Atom"
+        b: "Molecule"
+        c: "Organelle"
+        d: "Cell"
+
+  mathematics:
+    1:
+      question: "What is the value of pi (rounded to two decimal places)?"
+      answer: "a"
+      choices:
+        a: "3.14"
+        b: "2.71"
+        c: "1.62"
+        d: "3.33"
+    2:
+      question: "Which number is a prime number?"
+      answer: "c"
+      choices:
+        a: "9"
+        b: "15"
+        c: "17"
+        d: "21"
+    3:
+      question: "What is the next number in the Fibonacci sequence after 3, 5, 8?"
+      answer: "a"
+      choices:
+        a: "13"
+        b: "10"
+        c: "11"
+        d: "15"
+    4:
+      question: "What is 2^5?"
+      answer: "a"
+      choices:
+        a: "32"
+        b: "10"
+        c: "25"
+        d: "64"
+    5:
+      question: "Which of these is the formula for the area of a circle?"
+      answer: "a"
+      choices:
+        a: "A = πr^2"
+        b: "A = 2πr"
+        c: "A = r^2"
+        d: "A = πr"

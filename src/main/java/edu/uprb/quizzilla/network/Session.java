@@ -34,6 +34,11 @@ public interface Session extends Runnable {
     Logger getLogger();
 
     /**
+     * The session's unique ID.
+     */
+    UUID getID();
+
+    /**
      * See {@link PacketDispatcher}.
      */
     PacketDispatcher getDispatcher();
@@ -76,17 +81,21 @@ public interface Session extends Runnable {
              var in = new ObjectInputStream(socket.getInputStream()))
         {
             Thread.startVirtualThread(() -> {
-                while (isAlive()) {
+                while (isAlive() && !Thread.currentThread().isInterrupted()) {
                     // send pending outbound packets
                     try {
                         out.writeObject(getOutboundPackets().take());
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         logger.log(Level.WARNING, "Error sending packet", e);
+                    } catch (InterruptedException e) {
+                        stop();
+                        Thread.currentThread().interrupt();
+                        break;
                     }
                 }
             });
 
-            while (isAlive()) {
+            while (isAlive() && !Thread.currentThread().isInterrupted()) {
                 // wait for incoming packets
                 Object obj = in.readObject();
                 // verify that it's a packet and process it
@@ -100,12 +109,15 @@ public interface Session extends Runnable {
         } catch (ClassNotFoundException e) {
             logger.log(Level.WARNING, "Unrecognized packet", e);
         } finally {
+            stop();
+
             try {
                 socket.close();
-                stop(); // just in case
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Error closing session socket", e);
+                logger.log(Level.WARNING, "Error closing socket", e);
             }
+
+            Thread.currentThread().interrupt();
         }
     }
 }

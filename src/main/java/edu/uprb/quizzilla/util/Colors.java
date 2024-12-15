@@ -14,7 +14,7 @@ public final class Colors {
     public static final String BLACK = "\033[30m";
     public static final String RED = "\033[31m";
     public static final String GREEN = "\u001B[38;5;120m";
-    public static final String YELLOW = "\033[33m";
+    public static final String YELLOW = "\033[93m";
     public static final String BLUE = "\033[34m";
     public static final String MAGENTA = "\033[35m";
     public static final String CYAN = "\u001B[38;5;87m";

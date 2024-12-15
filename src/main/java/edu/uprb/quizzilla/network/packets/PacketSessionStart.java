@@ -8,18 +8,18 @@ import java.util.UUID;
 public class PacketSessionStart implements Packet {
 
     private final InetAddress serverAddress;
-    private final UUID uuid;
+    private final UUID sessionID;
 
-    public PacketSessionStart(InetAddress serverAddress, UUID uuid) {
+    public PacketSessionStart(InetAddress serverAddress, UUID sessionID) {
         this.serverAddress = serverAddress;
-        this.uuid = uuid;
+        this.sessionID = sessionID;
     }
 
     public InetAddress getServerAddress() {
         return serverAddress;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public UUID getSessionID() {
+        return sessionID;
     }
 }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,7 +16,7 @@ public class GameConfig {
 
     private static final Logger logger = Logger.getLogger(GameConfig.class.getName());
 
-    private final Map<String, List<Question>> questions = new HashMap<>();
+    private final Map<String, List<Trivia>> trivia = new HashMap<>();
     private int maxSessions;
     private int timeLimit;
     private YamlFile yamlFile;
@@ -35,9 +36,9 @@ public class GameConfig {
             // Load the entire file
             yamlFile.load();
 
-            // Load game settings and questions
-            logger.info("Loading game settings and questions...");
-            loadQuestions();
+            // Load game settings and trivia
+            logger.info("Loading game settings and trivia...");
+            loadTrivia();
             loadGameSettings();
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error loading config file", e);
@@ -49,7 +50,7 @@ public class GameConfig {
         this.timeLimit = yamlFile.getInt("time-limit");
     }
 
-    private void loadQuestions() {
+    private void loadTrivia() {
         // Load the categories section
         var categoriesSection = yamlFile.getConfigurationSection("categories");
         if (categoriesSection == null)
@@ -59,32 +60,31 @@ public class GameConfig {
         for (String category : categoriesSection.getKeys(false)) {
             var questions = loadCategoryQuestions(
                     categoriesSection.getConfigurationSection(category), category);
-            this.questions.put(category, questions);
+            this.trivia.put(category, questions);
         }
     }
 
-    private List<Question> loadCategoryQuestions(
-            ConfigurationSection categorySection, String category)
-    {
-        List<Question> questions = new ArrayList<>();
+    private List<Trivia> loadCategoryQuestions(
+            ConfigurationSection categorySection, String category) {
+        List<Trivia> trivias = new ArrayList<>();
         if (categorySection == null)
-            return questions;
+            return trivias;
 
         // Iterate over questions in the category
         for (String index : categorySection.getKeys(false)) {
             var questionSection = categorySection.getConfigurationSection(index);
             if (questionSection != null) {
-                questions.add(parseQuestion(questionSection, category));
+                trivias.add(parseQuestion(questionSection, category));
             }
         }
-        return questions;
+        return trivias;
     }
 
-    private Question parseQuestion(ConfigurationSection questionSection, String category) {
+    private Trivia parseQuestion(ConfigurationSection questionSection, String category) {
         String text = questionSection.getString("question");
         String answer = questionSection.getString("answer");
 
-        var question = new Question(category, text, answer);
+        var question = new Trivia(category, text, answer);
 
         // Load choices for the question, if any
         var choicesSection = questionSection.getConfigurationSection("choices");
@@ -97,8 +97,18 @@ public class GameConfig {
         return question;
     }
 
-    public Map<String, List<Question>> getQuestions() {
-        return questions;
+    public String getRandomCategory() {
+        List<String> categories = new ArrayList<>(trivia.keySet());
+        int randomIdx = ThreadLocalRandom.current().nextInt(categories.size());
+        return categories.get(randomIdx);
+    }
+
+    public List<Trivia> getTrivia(String category) {
+        return trivia.get(category);
+    }
+
+    public Map<String, List<Trivia>> getTrivia() {
+        return trivia;
     }
 
     public int getMaxSessions() {

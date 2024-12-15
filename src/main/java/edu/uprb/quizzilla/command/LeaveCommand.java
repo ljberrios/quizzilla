@@ -1,6 +1,6 @@
 package edu.uprb.quizzilla.command;
 
-import edu.uprb.quizzilla.Quizzilla;
+import edu.uprb.quizzilla.Client;
 import edu.uprb.quizzilla.network.Session;
 import edu.uprb.quizzilla.network.packets.PacketSessionStop;
 
@@ -8,9 +8,9 @@ import static edu.uprb.quizzilla.util.Colors.*;
 
 public class LeaveCommand implements Command {
 
-    private final Quizzilla main;
+    private final Client main;
 
-    public LeaveCommand(Quizzilla main) {
+    public LeaveCommand(Client main) {
         this.main = main;
     }
 
@@ -21,9 +21,9 @@ public class LeaveCommand implements Command {
 
     @Override
     public void execute(Session session, String[] args) {
-        if (main.hasActiveClientSession()) {
+        if (session != null && session.isAlive()) {
             session.sendPacket(new PacketSessionStop());
-            main.closeClientSession();
+            main.closeSession();
             print(GREEN + "Left the server");
         } else {
             print(RED + "Not connected to a server");

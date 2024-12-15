@@ -1,15 +1,15 @@
 package edu.uprb.quizzilla.command;
 
-import edu.uprb.quizzilla.Quizzilla;
+import edu.uprb.quizzilla.Client;
 import edu.uprb.quizzilla.network.Session;
 
 import static edu.uprb.quizzilla.util.Colors.*;
 
 public class ShutdownCommand implements Command {
 
-    private final Quizzilla main;
+    private final Client main;
 
-    public ShutdownCommand(Quizzilla main) {
+    public ShutdownCommand(Client main) {
         this.main = main;
     }
 

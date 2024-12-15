@@ -1,4 +1,4 @@
-package edu.uprb.quizzilla.server;
+package edu.uprb.quizzilla;
 
 import edu.uprb.quizzilla.network.PacketDispatcher;
 import edu.uprb.quizzilla.network.packets.PacketSessionStart;
@@ -19,9 +19,9 @@ import java.util.logging.Logger;
  * Contains all {@link ServerSession}s and their respective virtual threads.
  * To start the server, {@link #listenForConnections(int)} must be called.
  */
-public class SessionManager {
+public class Server {
 
-    private static final Logger logger = Logger.getLogger(SessionManager.class.getName());
+    private static final Logger logger = Logger.getLogger(Server.class.getName());
 
     private final ExecutorService sessionThreadPool = Executors.newVirtualThreadPerTaskExecutor();
     private final Map<UUID, ServerSession> sessions = new ConcurrentHashMap<>();
@@ -29,9 +29,9 @@ public class SessionManager {
     private final int maxSessions;
     private final PacketDispatcher dispatcher;
 
-    private ServerSession leader;
+    private ServerSession host;
 
-    public SessionManager(int maxSessions, PacketDispatcher dispatcher) {
+    public Server(int maxSessions, PacketDispatcher dispatcher) {
         this.maxSessions = maxSessions;
         this.dispatcher = dispatcher;
     }
@@ -57,9 +57,9 @@ public class SessionManager {
 
         ServerSession session = new ServerSession(socket, dispatcher);
         // Assign server leader if first player
-        if (this.leader == null) {
-            this.leader = session;
-            logger.info("Assigned server leader: " + socket.getInetAddress());
+        if (this.host == null) {
+            this.host = session;
+            logger.info("Server Host: " + socket.getInetAddress());
         }
 
         // Start the session
@@ -102,7 +102,7 @@ public class SessionManager {
 
     public void shutdown() {
         if (!sessionThreadPool.isShutdown()) {
-            logger.info("Shutting down. Ending all sessions...");
+            logger.info("Shutting down server. Ending all sessions...");
             sessions.keySet().forEach(this::stopSession);
             sessionThreadPool.shutdown();
         }
@@ -116,7 +116,7 @@ public class SessionManager {
         return sessions;
     }
 
-    public ServerSession getServerLeader() {
-        return leader;
+    public ServerSession getHost() {
+        return host;
     }
 }

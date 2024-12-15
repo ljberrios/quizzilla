@@ -5,18 +5,18 @@ import edu.uprb.quizzilla.network.Packet;
 public class PacketChatMessage implements Packet {
 
     private final String sender;
-    private final String message;
+    private final String[] messages;
 
-    public PacketChatMessage(String sender, String message) {
+    public PacketChatMessage(String sender, String... messages) {
         this.sender = sender;
-        this.message = message;
+        this.messages = messages;
     }
 
     public String getSender() {
         return sender;
     }
 
-    public String getMessage() {
-        return message;
+    public String[] getMessages() {
+        return messages;
     }
 }
