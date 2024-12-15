@@ -1,6 +1,7 @@
 package edu.uprb.quizzilla.game;
 
 import javax.sound.sampled.AudioSystem;
+import java.io.BufferedInputStream;
 
 public enum GameSounds {
 
@@ -24,7 +25,8 @@ public enum GameSounds {
                         .getResourceAsStream("sounds/" + fileName);
                 if (in != null) {
                     var clip = AudioSystem.getClip();
-                    var inputStream = AudioSystem.getAudioInputStream(in);
+                    var buff = new BufferedInputStream(in);
+                    var inputStream = AudioSystem.getAudioInputStream(buff);
                     clip.open(inputStream);
                     clip.start();
                 }

@@ -5,13 +5,10 @@ import edu.uprb.quizzilla.util.Countdown;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 
 import static edu.uprb.quizzilla.util.Colors.*;
 
 public class Game {
-
-    private static final Logger logger = Logger.getLogger(Game.class.getName());
 
     private final Map<UUID, Player> players = new ConcurrentHashMap<>();
     private final List<Trivia> trivia = Collections.synchronizedList(new ArrayList<>());
@@ -139,6 +136,10 @@ public class Game {
     }
 
     private void startNewRound() {
+        if (currentTrivia != null)
+            broadcast(GREEN + "The correct answer was "
+                    + UNDERLINE + CYAN + currentTrivia.getAnswer());
+
         currentTrivia = null;
         correctAnswers.clear();
 

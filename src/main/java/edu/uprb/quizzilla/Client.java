@@ -64,7 +64,7 @@ public class Client {
     }
 
     public void closeSession() {
-        if (clientSession.isAlive())
+        if (clientSession != null && clientSession.isAlive())
             clientSession.stop();
     }
 

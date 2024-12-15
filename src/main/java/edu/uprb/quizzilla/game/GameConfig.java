@@ -27,14 +27,15 @@ public class GameConfig {
             if (url == null)
                 throw new IllegalStateException("Could not find config.yml");
 
-            yamlFile = new YamlFile(url);
+            yamlFile = new YamlFile("config.yml");
             if (!yamlFile.exists()) {
                 yamlFile.createNewFile();
+                yamlFile.load(url.openStream());
+                yamlFile.save();
                 logger.info("Created game config file");
+            } else {
+                yamlFile.load();
             }
-
-            // Load the entire file
-            yamlFile.load();
 
             // Load game settings and trivia
             logger.info("Loading game settings and trivia...");
